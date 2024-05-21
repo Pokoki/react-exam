@@ -5,6 +5,7 @@ const http = require("http");
 const WebSocket = require("ws");
 const { z } = require("zod");
 
+
 /**
  * @typedef {Object} Company
  * @property {string} name - The name of the company.
@@ -352,6 +353,8 @@ const ReducePayloadSchema = z.object({
 
 const app = express();
 app.use(express.json());
+const cors = require('cors');
+app.use(cors());
 
 /**
  * GET /companies route returning a JSON list of companies with id, name, and domains.
