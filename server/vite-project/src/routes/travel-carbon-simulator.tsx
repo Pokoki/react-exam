@@ -24,10 +24,11 @@ const TravelCarbonSimulator: React.FC = () => {
     bike: 0,
     electricBike: 0,
   });
+
   const [initialCarbon, setInitialCarbon] = useState<number | null>(null);
   const [currentCarbon, setCurrentCarbon] = useState<number | null>(null);
 
-  const handleDistanceChange = (mode: string, value: number) => {
+  const handleDistanceChange = (mode: keyof typeof distances, value: number) => {
     setDistances({ ...distances, [mode]: value });
   };
 
@@ -50,58 +51,36 @@ const TravelCarbonSimulator: React.FC = () => {
     setCurrentCarbon(current);
   };
 
-  const handleChoice = async () => {
-    const reduction = initialCarbon! - currentCarbon!;
-    try {
-      const response = await fetch('http://localhost:3000/reduce', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ yearlyCarbonReduction: reduction }),
-      });
-      if (!response.ok) {
-        throw new Error('Echec de l\'envoie de la reduction');
-      }
-      alert(`Vous avez réduit votre empreinte carbon de ${reduction.toFixed(2)} ! kg/an, Bravo !`);
-    } catch (error) {
-      console.error('Echec de l\'envoie de la reduction:', error);
-    }
-  };
-
   return (
     <div>
-      <h1>Travel Carbon Simulator</h1>
-      <label>
-        Nombre de voyage par an:
-        <input
-          type="number"
-          value={travels}
-          onChange={(e) => setTravels(Number(e.target.value))}
-        />
-      </label>
-      {Object.keys(distances).map((mode) => (
-        <label key={mode}>
-          {mode.replace(/([A-Z])/g, ' $1')} (km):
+      <h1>Simulateur de carbone de voyage</h1>
+      <div>
+        <label>
+          Nombre de voyages par an:
           <input
             type="number"
-            value={distances[mode as keyof typeof distances]}
-            onChange={(e) => handleDistanceChange(mode, Number(e.target.value))}
-            onBlur={handleSimulationChange}
+            value={travels}
+            onChange={(e) => setTravels(Number(e.target.value))}
           />
         </label>
+      </div>
+      {Object.keys(distances).map((mode) => (
+        <div key={mode}>
+          <label>
+            {mode.replace(/([A-Z])/g, ' $1')} (km):
+            <input
+              type="number"
+              value={distances[mode as keyof typeof distances]}
+              onChange={(e) => handleDistanceChange(mode as keyof typeof distances, Number(e.target.value))}
+              onBlur={handleSimulationChange}
+            />
+          </label>
+        </div>
       ))}
-      <button onClick={handleSubmit}>Validé</button>
+      <button onClick={handleSubmit}>Valider</button>
       {initialCarbon !== null && (
         <div>
-          <p>Emission annuel de base: {initialCarbon.toFixed(2)} kg</p>
-          {currentCarbon !== null && (
-            <div>
-              <p>Emission annuel maintenant: {currentCarbon.toFixed(2)} kg</p>
-              <p>Difference: {(initialCarbon - currentCarbon).toFixed(2)} kg</p>
-              {currentCarbon < initialCarbon && (
-                <button onClick={handleChoice}>Mon choix!</button>
-              )}
-            </div>
-          )}
+          <p>Emission annuelle de base: {initialCarbon.toFixed(2)} kg</p>
         </div>
       )}
     </div>
